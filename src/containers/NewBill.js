@@ -21,6 +21,12 @@ export default class NewBill {
     e.preventDefault();
     const file = this.document.querySelector(`input[data-testid="file"]`)
       .files[0];
+
+    if (file.type != "image/jpeg" && file.type != "image/png") {
+      document.querySelector(`input[data-testid="file"]`).value = "";
+      return;
+    }
+
     const filePath = e.target.value.split(/\\/g);
     const fileName = filePath[filePath.length - 1];
     const formData = new FormData();
@@ -28,7 +34,6 @@ export default class NewBill {
     formData.append("file", file);
     formData.append("email", email);
 
-    //todo : Conditionel pour check l'extension (png / jpeg accepte seulement) --> sinon return pour pas exe
     this.store
       .bills()
       .create({
