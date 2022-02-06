@@ -80,6 +80,31 @@ describe("When I click Icon", () => {
   });
 });
 
+describe("When I click New bill button", () => {
+  test("Then New bill page should render", () => {
+    const html = BillsUI({ data: [] });
+    document.body.innerHTML = html;
+
+    const onNavigate = (pathname) => {
+      document.body.innerHTML = ROUTES({ pathname });
+    };
+
+    const mybills = new Bills({
+      document,
+      onNavigate,
+      store: store,
+      localStorage: window.localStorage,
+    });
+
+    const handleClickNewBill = jest.fn((e) => mybills.handleClickNewBill(e));
+    const button = screen.getByTestId("btn-new-bill");
+    button.addEventListener("click", handleClickNewBill);
+    userEvent.click(button);
+    expect(handleClickNewBill).toHaveBeenCalled();
+    expect(screen.getByTestId("form-new-bill")).toBeTruthy();
+  });
+});
+
 describe("When I navigate to Bills Page", () => {
   test("Then Loading page should have been called", () => {
     const UI = BillsUI({ data: [], loading: true, error: false });
@@ -88,5 +113,40 @@ describe("When I navigate to Bills Page", () => {
   test("then Error page should have been called on error", () => {
     const Ui = BillsUI({ data: [], loading: false, error: "ErrorMessage" });
     expect(Ui).toBe(ErrorPage("ErrorMessage"));
+  });
+});
+
+describe("When I navigate to Bills page", () => {
+  test("Then Bills object shoud be instanciated", () => {
+    const ui = BillsUI({ data: bills });
+    document.body.innerHTML = ui;
+
+    const onNavigate = (pathname) => {
+      document.body.innerHTML = ROUTES({ pathname });
+    };
+    const myBill = new Bills({
+      document,
+      onNavigate,
+      store: null,
+      localStorage: null,
+    });
+    expect(myBill.document).toBe(document);
+    expect(myBill.onNavigate).toBe(onNavigate);
+    expect(myBill.store).toBe(null);
+  });
+  test("Then erase html", () => {
+    const onNavigate = (pathname) => {
+      document.body.innerHTML = ROUTES({ pathname });
+    };
+    document.body.innerHTML = "<div></div>";
+    const myBill = new Bills({
+      document,
+      onNavigate,
+      store: null,
+      localStorage: null,
+    });
+    expect(myBill.document).toBe(document);
+    expect(myBill.onNavigate).toBe(onNavigate);
+    expect(myBill.store).toBe(null);
   });
 });
