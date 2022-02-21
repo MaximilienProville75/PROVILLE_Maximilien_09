@@ -46,7 +46,7 @@ describe("Given I am connected as an employee", () => {
     });
   });
   describe("When i click on submit", () => {
-    test("Then a new bill should be created", () => {
+    test("The bill should be updated", () => {
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,
       });
@@ -64,14 +64,14 @@ describe("Given I am connected as an employee", () => {
     const html = NewBillUI();
     document.body.innerHTML = html;
 
-    const newBillUI = new NewBill({
+    const newBillContainer = new NewBill({
       document,
       onNavigate: () => {},
       store: null,
       localStorage: window.localStorage,
     });
-    newBillUI.fileUrl = "https://www.test.test";
-    newBillUI.fileName = "test.test";
+    newBillContainer.fileUrl = "https://www.test.test";
+    newBillContainer.fileName = "test.test";
 
     const et = screen.getByTestId("expense-type");
     et.value = "Transports";
@@ -100,7 +100,7 @@ describe("Given I am connected as an employee", () => {
       preventDefault: jest.fn(),
       target: form,
     };
-    newBillUI.handleSubmit(customEvent);
+    newBillContainer.handleSubmit(customEvent);
     expect(mock).toHaveBeenCalledTimes(1);
     expect(mock).toHaveBeenCalledWith({
       amount: 100,
@@ -148,7 +148,6 @@ describe("Given I am connected as an employee", () => {
   describe("When I select a file", () => {
     test("It should change file value if the file type is wrong", () => {
       const mock = jest.fn();
-
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,
       });

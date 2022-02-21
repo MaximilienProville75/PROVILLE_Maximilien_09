@@ -17,11 +17,11 @@ export default class NewBill {
     this.billId = null;
     new Logout({ document, localStorage, onNavigate });
   }
-  handleChangeFile = (e) => {
+  handleChangeFile(e) {
     e.preventDefault();
-    const file = this.document.querySelector(`input[data-testid="file"]`)
-      .files[0];
-
+    // const file = this.document.querySelector(`input[data-testid="file"]`)
+    //   .files[0];
+    const file = e.target.files[0];
     if (file.type != "image/jpeg" && file.type != "image/png") {
       document.querySelector(`input[data-testid="file"]`).value = "";
       return;
@@ -49,8 +49,8 @@ export default class NewBill {
         this.fileName = fileName;
       })
       .catch((error) => console.error(error));
-  };
-  handleSubmit = (e) => {
+  }
+  handleSubmit(e) {
     e.preventDefault();
     console.log(
       'e.target.querySelector(`input[data-testid="datepicker"]`).value',
@@ -77,10 +77,10 @@ export default class NewBill {
     };
     this.updateBill(bill);
     this.onNavigate(ROUTES_PATH["Bills"]);
-  };
+  }
 
   // not need to cover this function by tests
-  updateBill = (bill) => {
+  updateBill(bill) {
     if (this.store) {
       this.store
         .bills()
@@ -90,5 +90,5 @@ export default class NewBill {
         })
         .catch((error) => console.error(error));
     }
-  };
+  }
 }

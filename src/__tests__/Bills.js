@@ -3,12 +3,21 @@
  */
 
 import { screen, waitFor } from "@testing-library/dom";
+import userEvent from "@testing-library/user-event";
 import BillsUI from "../views/BillsUI.js";
 import { bills } from "../fixtures/bills.js";
 import { ROUTES_PATH } from "../constants/routes.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
+import mockStore from "../__mocks__/store";
+import Bills from "../containers/Bills.js";
+import LoadingPage from "../views/LoadingPage.js";
+import ErrorPage from "../views/ErrorPage.js";
+import store from "../__mocks__/store";
+import { ROUTES } from "../constants/routes.js";
 
 import router from "../app/Router.js";
+
+jest.mock("../app/store", () => mockStore);
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
@@ -45,6 +54,7 @@ describe("Given I am connected as an employee", () => {
   });
 });
 describe("When I click Icon", () => {
+  //! 1
   test("Then Modal should render", () => {
     const ui = BillsUI({ data: bills });
     document.body.innerHTML = ui;
@@ -54,7 +64,7 @@ describe("When I click Icon", () => {
     const myBill = new Bills({
       document,
       onNavigate,
-      store: store,
+      store: null,
       localStorage: window.localStorage,
     });
     $.fn.modal = jest.fn().mockImplementation(() => {
@@ -81,6 +91,7 @@ describe("When I click Icon", () => {
 });
 
 describe("When I click New bill button", () => {
+  //! 2
   test("Then New bill page should render", () => {
     const html = BillsUI({ data: [] });
     document.body.innerHTML = html;
@@ -92,7 +103,7 @@ describe("When I click New bill button", () => {
     const mybills = new Bills({
       document,
       onNavigate,
-      store: store,
+      store: null,
       localStorage: window.localStorage,
     });
 
@@ -106,10 +117,12 @@ describe("When I click New bill button", () => {
 });
 
 describe("When I navigate to Bills Page", () => {
+  //! 3
   test("Then Loading page should have been called", () => {
     const UI = BillsUI({ data: [], loading: true, error: false });
     expect(UI).toBe(LoadingPage());
   });
+  //! 4
   test("then Error page should have been called on error", () => {
     const Ui = BillsUI({ data: [], loading: false, error: "ErrorMessage" });
     expect(Ui).toBe(ErrorPage("ErrorMessage"));
@@ -117,6 +130,7 @@ describe("When I navigate to Bills Page", () => {
 });
 
 describe("When I navigate to Bills page", () => {
+  //! 5
   test("Then Bills object shoud be instanciated", () => {
     const ui = BillsUI({ data: bills });
     document.body.innerHTML = ui;
@@ -134,6 +148,8 @@ describe("When I navigate to Bills page", () => {
     expect(myBill.onNavigate).toBe(onNavigate);
     expect(myBill.store).toBe(null);
   });
+
+  //! 6
   test("Then erase html", () => {
     const onNavigate = (pathname) => {
       document.body.innerHTML = ROUTES({ pathname });

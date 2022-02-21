@@ -16,7 +16,6 @@ import router from "../app/Router";
 //? --------------------------------------------------
 //? simule faux call via mockstore pour tourner test sans server load
 //? --------------------------------------------------
-
 jest.mock("../app/store", () => mockStore);
 
 describe("Given I am connected as an Admin", () => {
