@@ -9,8 +9,11 @@ export default class NewBill {
     const formNewBill = this.document.querySelector(
       `form[data-testid="form-new-bill"]`
     );
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.updateBill = this.updateBill.bind(this);
     formNewBill.addEventListener("submit", this.handleSubmit);
     const file = this.document.querySelector(`input[data-testid="file"]`);
+    this.handleChangeFile = this.handleChangeFile.bind(this);
     file.addEventListener("change", this.handleChangeFile);
     this.fileUrl = null;
     this.fileName = null;
@@ -19,9 +22,8 @@ export default class NewBill {
   }
   handleChangeFile(e) {
     e.preventDefault();
-    // const file = this.document.querySelector(`input[data-testid="file"]`)
-    //   .files[0];
     const file = e.target.files[0];
+    //* Ajouter Cas Erreur
     if (file.type != "image/jpeg" && file.type != "image/png") {
       document.querySelector(`input[data-testid="file"]`).value = "";
       return;

@@ -3,17 +3,24 @@
  */
 
 import userEvent from "@testing-library/user-event";
-import { fireEvent, screen } from "@testing-library/dom";
+import { fireEvent, screen, waitFor } from "@testing-library/dom";
+import mockedstore from "../__mocks__/store";
 import { localStorageMock } from "../__mocks__/localStorage.js";
 import NewBillUI from "../views/NewBillUI.js";
 import NewBill from "../containers/NewBill.js";
-import mockedstore from "../__mocks__/store";
+
+import { ROUTES_PATH } from "../constants/routes";
+import router from "../app/Router";
+
+jest.mock("../app/store", () => mockedstore);
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on NewBill Page", () => {
     test("Then handleSubmit is called", () => {
       const mock = jest.fn();
-      jest.spyOn(NewBill.prototype, "handleSubmit").mockImplementation(mock);
+      const spy = jest
+        .spyOn(NewBill.prototype, "handleSubmit")
+        .mockImplementation(mock);
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,
       });
@@ -43,6 +50,7 @@ describe("Given I am connected as an employee", () => {
       expect(form).toBeTruthy();
       fireEvent.submit(form);
       expect(mock).toHaveBeenCalledTimes(1);
+      spy.mockRestore();
     });
   });
   describe("When i click on submit", () => {
@@ -59,7 +67,9 @@ describe("Given I am connected as an employee", () => {
       })
     );
     const mock = jest.fn();
-    jest.spyOn(NewBill.prototype, "updateBill").mockImplementation(mock);
+    const spy = jest
+      .spyOn(NewBill.prototype, "updateBill")
+      .mockImplementation(mock);
 
     const html = NewBillUI();
     document.body.innerHTML = html;
@@ -115,14 +125,14 @@ describe("Given I am connected as an employee", () => {
       type: "Transports",
       vat: "",
     });
+    spy.mockRestore();
   });
   describe("When i select a file", () => {
     test("then handleChangeFile is called", () => {
-      //PREPARATION
       const mock = jest.fn();
-      const file = new File(["hello"], "hello.png", { type: "image/png" });
 
-      jest
+      const file = new File(["hello"], "hello.png", { type: "image/png" });
+      const spy = jest
         .spyOn(NewBill.prototype, "handleChangeFile")
         .mockImplementation(mock);
       Object.defineProperty(window, "localStorage", {
@@ -143,6 +153,7 @@ describe("Given I am connected as an employee", () => {
       expect(fileInput).toBeTruthy();
       userEvent.upload(fileInput, file);
       expect(mock).toHaveBeenCalledTimes(1);
+      spy.mockRestore();
     });
   });
   describe("When I select a file", () => {
@@ -168,17 +179,57 @@ describe("Given I am connected as an employee", () => {
         store: mockedstore,
         localStorage: null,
       });
+
+      const badFile = new File(["hello"], "hello.png", { type: "image/png" });
+
       const fileInput = document.querySelector(`input[data-testid="file"]`);
       const customEvent = {
         preventDefault: jest.fn(),
-        target: fileInput,
+        target: {
+          files: [badFile],
+          value: "hello.png",
+        },
       };
-      const badFile = new File(["hello"], "hello.png", { type: "image/png" });
-      fileInput.files = [badFile];
+
       myNewBill.handleChangeFile(customEvent);
-      expect(screen.getByTestId("file").value).toBe("");
       expect(myNewBill.fileUrl).toBe(null);
       expect(myNewBill.fileName).toBe(null);
     });
   });
+});
+
+test("NewBill integration test", async () => {
+  mockedstore.bills().create.mockClear();
+  document.body.innerHTML = "";
+  Object.defineProperty(window, "localStorage", {
+    value: localStorageMock,
+  });
+  window.localStorage.setItem(
+    "user",
+    JSON.stringify({
+      type: "Employee",
+      email: "test@test.com",
+    })
+  );
+  const root = document.createElement("div");
+  root.setAttribute("id", "root");
+  document.body.append(root);
+  router();
+  window.onNavigate(ROUTES_PATH.NewBill);
+  await waitFor(() => screen.getByText(/Envoyer une note de frais/));
+  const fileInput = screen.getByTestId("file");
+  expect(fileInput).toBeTruthy();
+  const mockFile = new File(["test.png"], "test.png", {
+    type: "image/png",
+  });
+  fireEvent.change(fileInput, {
+    target: {
+      files: [mockFile],
+    },
+  });
+  const mockFormData = new FormData();
+  mockFormData.append("file", mockFile);
+  mockFormData.append("email", "test@test.com");
+  await new Promise(process.nextTick);
+  expect(mockedstore.bills().create).toHaveBeenCalledTimes(1);
 });
